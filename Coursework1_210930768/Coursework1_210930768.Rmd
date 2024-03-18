@@ -1,0 +1,96 @@
+---
+title: "MTH6139 Time Series"
+subtitle: "Coursework 1"
+author:
+- name: Hao Mei
+date: "18 March 2024"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, echo=FALSE}
+htmltools::img(src = knitr::image_uri("QMlogo.png"), 
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:0; padding:10px; width:30%;')
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(prophet)
+library(zoo)
+```
+
+## Understanding CO2 Data
+
+The dataset title "co2 '' put up info on the monthly concentration of
+atmospheric carbon dioxide ( CO2 ) in parts per million , as record at
+the Mauna Loa Observatory . These data play a crucial role in the
+examination of climate change, since they provide insights into the
+enduring patterns of rising carbon dioxide (CO2) concentrations in the
+Earth's atmosphere.
+
+## Purpose of the Project
+
+The object lens of this study is to try and foreshadow the level of CO2
+in order to savvy their pattern of increase and anticipate future
+concentrations . Through this approach, we want to gain a deeper
+understanding of the rate at which climate change is occurring and
+assess the efficacy of strategies used to mitigate CO2 emissions.
+
+Prepare the data for analysis with Prophet. Create a dataframe with two
+columns: `ds` for the date and `y` for the CO2 levels.
+
+```{r data-preparation}
+co2.df = data.frame(
+  ds = as.Date(as.yearmon(time(co2))), 
+  y = co2)
+```
+
+## Model Building and Forecasting
+
+With the data prepared, we proceed to fit a model and make forecasts.
+
+```{r model-forecasting}
+# Fit the model
+m = prophet(co2.df)
+
+# Generate future data frame for prediction
+f = make_future_dataframe(m, periods=8, freq="quarter")
+
+# Forecast
+p = predict(m, f)
+
+# Visualize the forecast
+plot(m, p)
+```
+
+## Enhancing Our Analysis
+
+Let's examine patterns and seasonality to better comprehend. Decomposing
+the time series to see these components independently.
+
+```{r decomposition}
+prophet_plot_components(m, p)
+```
+
+```{r}
+# Further Exploratory Data Analysis
+# Plotting the raw data
+plot(co2.df$ds, co2.df$y, type='l', main='Monthly CO2 Levels', xlab='Year', ylab='CO2 PPM', col='blue')
+
+# Linear Trend Analysis
+# A simple linear model to understand the growth of the series
+linear_model <- lm(y ~ ds, data = co2.df)
+summary(linear_model)
+
+# Add linear trend line to the plot
+abline(linear_model, col="red")
+```
